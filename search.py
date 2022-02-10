@@ -17,6 +17,7 @@ In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
+from re import S
 import util
 
 class SearchProblem:
@@ -113,6 +114,9 @@ def breadthFirstSearch(problem):
     closed = [problem.getStartState()] #Starting node is in the closed list
     fringe = Queue()
 
+    if problem.isGoalState(problem.getStartState()):
+        return []
+
     for s in problem.getSuccessors(problem.getStartState()):
         fringe.push((s, [])) #Stores the successor and list of actions to get to that node
 
@@ -140,7 +144,7 @@ def uniformCostSearch(problem):
     fringe = PriorityQueue()
 
     for s in problem.getSuccessors(problem.getStartState()):
-        fringe.push((s, []), s[2]) #Stores the successor and list of actions to get to that node, first node no cost
+        fringe.push((s, []), s[2]) #Stores the successor and list of actions to get there
 
     while not fringe.isEmpty():
         node = fringe.pop()
@@ -156,7 +160,10 @@ def uniformCostSearch(problem):
             closed.append(state[0]) #Adds the coordinates to the closed list
             for child in problem.getSuccessors(state[0]):
                 if child not in closed:
-                    fringe.push((child, actions.copy()), child[2]) #Adds child and a copy of actions to get here, along with cost of each child
+                    #Update total cost of node
+                    temp = list(child)
+                    temp[2] += state[2]
+                    fringe.push((temp, actions.copy()), temp[2]) #Adds child and a copy of actions to get here with priority of cost
 
 def nullHeuristic(state, problem=None):
     """
@@ -173,7 +180,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     fringe = PriorityQueue()
 
     for s in problem.getSuccessors(problem.getStartState()):
-        fringe.push((s, []), 0) #Stores the successor and list of actions to get to that node, first node no cost
+        fringe.push((s, []), s[2] + heuristic(s[0], problem)) #Stores the successor and list of actions to get there, priority of cost + heuristic
 
     while not fringe.isEmpty():
         node = fringe.pop()
@@ -189,7 +196,10 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             closed.append(state[0]) #Adds the coordinates to the closed list
             for child in problem.getSuccessors(state[0]):
                 if child not in closed:
-                    fringe.push((child, actions.copy()), child[2] + heuristic(state[0], problem)) #Adds child and a copy of actions to get here, along with cost of each child
+                    #Update total cost of node
+                    temp = list(child)
+                    temp[2] += state[2]
+                    fringe.push((temp, actions.copy()), temp[2] + heuristic(temp[0], problem)) #Adds child and a copy of actions to get here with priority of cost + heuristic
 
 
 # Abbreviations
